@@ -1,0 +1,575 @@
+﻿<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">	
+    <meta name=”viewport” content=”user-scalable=no” />
+    <link href="style.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="js/swiper.min.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.touchSwipe.min.js"></script>
+    <script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
+    <script>
+			var cc=null;
+		        var IMG_WIDTH = 375;
+		        var currentImg = 0;
+		        var maxImages = 12;
+		        var cards;
+			var speed = 300;
+			var videoon = 0;		        
+			var timer;
+			var sup;
+			var swipeOptions = {
+				triggerOnTouchEnd: true,
+				swipeStatus: swipeStatus,
+				allowPageScroll: "vertical",
+				threshold: 75
+			};
+
+			$(function () {  
+				cards = $("#inside");
+				cards.swipe(swipeOptions);
+				menu = $("#wrapper");
+			});
+
+			function swipeStatus(event, phase, direction, distance) {
+				if (phase == "move" && (direction == "left" || direction == "right")) {
+					var duration = 0;
+
+                			if (direction == "left") {
+                    				if (currentImg != maxImages-1) {
+                    					scrollImages((IMG_WIDTH * currentImg) + distance, duration); 
+						}
+               				} else if (direction == "right") {
+               					if (currentImg != 0) {
+				                    scrollImages((IMG_WIDTH * currentImg) - distance, duration);
+						}
+			                }
+			        } else if (phase == "cancel") {
+			                scrollImages(IMG_WIDTH * currentImg, speed);
+			        } else if (phase == "end") {
+			                if (direction == "right") {
+			                    previousImage();
+			                } else if (direction == "left") {
+  			                    nextImage();
+			                }
+			        }
+			 }
+
+			function previousImage() {
+				pindex = 42*(currentImg-3);
+				videoon = 0;
+				currentImg = Math.max(currentImg - 1, 0);
+				scrollImages(IMG_WIDTH * currentImg, speed);
+					$('.nav').find( '.active' ).removeClass("active");
+					$('.fullnav').find( '.active' ).removeClass("active");
+					$('#nav-li'+(currentImg+1)).addClass("active");
+					$('#fullnav-li'+(currentImg+1)).addClass("active");
+					$(".fnc").css('-webkit-transform', 'translate(0,-'+pindex+'px)');
+
+			}
+
+
+			function nextImage() {
+				if(currentImg != maxImages-1) {
+					pindex = 42*(currentImg-1);
+              				currentImg = Math.min(currentImg + 1, maxImages - 1);
+			                scrollImages(IMG_WIDTH * currentImg, speed);
+					$('.nav').find( '.active' ).removeClass("active");
+					$('.fullnav').find( '.active' ).removeClass("active");
+					$('#nav-li'+(currentImg+1)).addClass("active");
+					$('#fullnav-li'+(currentImg+1)).addClass("active");
+					$(".fnc").css('-webkit-transform', 'translate(0,-'+pindex+'px)');
+			        } 
+		        }
+
+			function scrollImages(distance, duration) {
+				cards.css("-webkit-transition-duration", (duration / 1000).toFixed(1) + "s");
+
+				//inverse the number we set in the css
+            			var value = (distance < 0 ? "" : "-") + Math.abs(distance).toString();
+			        cards.css("-webkit-transform", "translate3d(" + value + "px,0,0)");
+			        menu.css("-webkit-transform", "translate3d(" + value + "px,0,0)");
+		        }
+
+	function ShowFull() {      
+		$('#inside').show();
+		$('.back').show();
+		$('.nav').hide();
+		$('.fullnav').show();
+	}
+	function HideFull() {      
+		$('#inside').hide();
+		$('.back').hide();
+		$('.nav').show();
+		$('.fullnav').hide();
+	}
+
+
+	function initGroup(n, i, b, t) {      
+	  var pindex = 0;
+  	  if(t == 'next') {	
+		if (cc < 0) {cc=i}
+		if(!cc) {cc=i} else { cc++; }  
+		if (cc == b) {
+			$(".wrapper").css('-webkit-transform', 'translate(-'+375*n+'px, 0)');
+			$("#inside").css('-webkit-transform', 'translate(-'+375*n+'px, 0)');
+			$('.nav').find( '.active' ).removeClass("active");
+			$('.fullnav').find( '.active' ).removeClass("active");
+			$('#nav-li'+(n+1)).addClass("active");
+			$('#fullnav-li'+(n+1)).addClass("active");
+			currentImg++;
+			cc = null;
+		}
+  	  }
+	  else if (t == 'prev') {	
+		pindex = 375*(n-2);              
+		if(!cc) {cc=i;} 
+		if (cc == 0) {
+			$(".wrapper").css('-webkit-transform', 'translate(-'+pindex+'px, 0)');
+			$("#inside").css('-webkit-transform', 'translate(-'+pindex+'px, 0)');
+			$('.nav').find( '.active' ).removeClass("active");
+			$('.fullnav').find( '.active' ).removeClass("active");
+			$('#nav-li'+(n-1)).addClass("active");
+			$('#fullnav-li'+(n-1)).addClass("active");
+			currentImg--;
+			cc = null;
+		} if(cc < 0) {cc=i+1;} cc--;       
+	  }
+	}
+
+	$(document).on('click', '.nav-li', function() {
+		var p = $(this).index(); 
+		pindex = p*375;                                             //для перемещения в меню
+		pindex2 = (p-2)*42;                                         //для перемещения навигации внутри
+		$('.nav').find( '.active' ).removeClass("active");          //удаляем активный пункт в навигации в меню
+		$('.fullnav').find( '.active' ).removeClass("active");      //удаляем активный пункт в навигации внутри
+		$('#fullnav-li'+(p+1)).addClass("active");                  //делаем активным пункт в нагицаии внутри
+		$(".fnc").css('-webkit-transform', 'translate(0,-'+pindex2+'px)');  //перемещаем навигацию внутри
+		$(this).addClass("active");                                         //делаем активный пункт в навигации в меню
+		$(".wrapper").css('-webkit-transform', 'translate(-'+pindex+'px, 0)'); //перемещаем меню
+		$("#inside").css('-webkit-transform', 'translate(-'+375*p+'px, 0)');
+		currentImg = p;
+	})
+
+
+	$(document).on('click', '.fullnav-li', function() {
+		var p = $(this).index(); 
+		pindex2 = p*375;                                             //для перемещения в меню
+		pindex = (p-2)*42; 
+		$('.fullnav').find( '.active' ).removeClass("active");
+		$(this).addClass("active");
+		$(".fnc").css('-webkit-transform', 'translate(0,-'+pindex+'px)');
+		$("#inside").css('-webkit-transform', 'translate(-'+375*p+'px, 0)');
+		currentImg = p;
+		$('.nav').find( '.active' ).removeClass("active");
+		$('#nav-li'+(p+1)).addClass("active");
+		$(".wrapper").css('-webkit-transform', 'translate(-'+pindex2+'px, 0)'); //перемещаем меню
+	})
+
+
+    </script>	
+</head>
+<body>
+	    <div class="nav">
+		<div class="nav-li active" id="nav-li1">1</div>
+		<div class="nav-li" id="nav-li2">2</div>
+		<div class="nav-li" id="nav-li3">3</div>
+		<div class="nav-li" id="nav-li4">4</div>
+		<div class="nav-li" id="nav-li5">5</div>
+		<div class="nav-li" id="nav-li6">6</div>
+		<div class="nav-li" id="nav-li7">7</div>
+		<div class="nav-li" id="nav-li8">8</div>
+		<div class="nav-li" id="nav-li9">9</div>
+		<div class="nav-li" id="nav-li10">10</div>
+		<div class="nav-li" id="nav-li11">11</div>
+		<div class="nav-li" id="nav-li12">12</div>
+	    </div>	
+            <div class="wrapper" id="wrapper">
+		<div class="page page1" id="1">
+		<div class="slide1" id="slide1">
+		    <div class="swiper-container swiper1" >
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">В конце 1640-х годов вокруг духовника царя Стефана Вонифатьева образуется кружок ревнителей благочестия, ратующий за очищение духовно-нравственного состояния русского общества, за водворение подлинного благочестия во всех областях жизни, а наипаче — в богослужении.
+			    </div>
+		            <div class="swiper-slide">На первых ролях в числе ревнителей оказались как будущие отцы старообрядчества (протоиереи Иоанн Неронов, Аввакум, Логгин, Лазарь, Даниил), так и архимандрит Новоспасского монастыря Никон. Все они были друзья и единомышленники. Все они позднее подписали челобитную царю с просьбой поставить патриархом митрополита Никона.
+			    </div>
+		            <div class="swiper-slide">Причина поддержки ясна. Члены кружка полагали, что Никон продолжит иметь с ними постоянный совет и «будет строить мир Церкви, внимая прилежно отца Иоанна (Неронова) глаголам». Таким образом, будущие старообрядцы надеялись видеть в патриархе Всея России послушное орудие для проведения в жизнь таких решений, какие ими бы и принимались.
+			    </div>
+		            <div class="swiper-slide">Однако, учитывая всю неправильность подобного отношения священников к своему патриарху, твёрдый сторонник канонической и духовной правды во всём Никон — не согласился принять такое положение вещей. Став патриархом, он сразу перестал допускать к себе без особой нужды указанных лиц и советоваться с ними, чем естественно возбудил последних против себя.
+			    </div>
+		            <div class="swiper-slide">С этого момента любое распоряжение Никона неизбежно встречалось ими в штыки. Поэтому не что иное, как уязвленная гордыня человеческая, стала начальным импульсом будущего церковного раскола.
+			    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination1"></div>
+		    </div>
+	            <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page2">
+		<div class="slide2" id="slide2">
+		    <div class="swiper-container swiper2">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Историко-культурная и одновременно политическая позиция старообрядчества состояла в том, что последнее прибежище истинного православия есть Русь, и больше ничего не осталось. Все остальные повредились в вере, за что коварных византийцев поработили турки, а русских людей на Западе, то есть предков нынешних "белорусов" и "украинцев", — поляки.
+                            </div>
+		            <div class="swiper-slide">Что предложили старообрядцы? 
+				Культурную парадигму "Россия и Европа", 
+				т.е. изоляционистскую ситуацию, в которой Россия противопоставляется Европе, 
+				вместо того чтобы Восточная Европа противопоставлялась Западной. Выиграть такое состязание наша страна не могла. Целый культурный регион, объединяющий русских, сербов, греков, болгар и т.д. мог соперничать с Западом. Но соперничество России и Европы равнозначно пpотивопо- ставлению византийского мира Нидерландам.
+                            </div>
+		            <div class="swiper-slide">Таким образом, сознательно или нет, но старообрядцы стремились ввергнуть русских людей в состояние скрытого раскола со Вселенской Церковью. И лишь никонианство сохраняло Россию не только страной православного вероисповедания, но и православной империей, лидирующей страной православной культуры.
+                            </div>
+
+		        </div>
+		        <div class="swiper-pagination swiper-pagination2"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page3">
+		<div class="slide3" id="slide3">
+		    <div class="swiper-container swiper3">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Особое событие 1652 года — перенесение мощей святителя Филиппа, митрополита Московского, убитого по приказу Ивана Грозного за обличение царских беззаконий и жестокостей. То был первый и самый серьёзный конфликт между самодержцем и главой Церкви в России, конфликт, в котором проявилось притязание царской власти на безудержное самоуправство и полное отрицание церковного авторитета.
+                            </div>
+		            <div class="swiper-slide">С тем, чтобы уменьшить риск повторения подобных событий в будущем, Никон счёл необходимым подтвердить почтение царской власти к церковной, путём публичного изъявления сыновней любви государя к пострадавшему святителю Филиппу.Патриарх отыскал в книгах рассказ о том, как император Феодосий, посылая за мощами Иоанна Златоуста, обращался к давно почившему святому с покаянной грамотой, прося в ней прощения за свою мать, гнавшую подвижника.
+                            </div>
+		            <div class="swiper-slide">По предложению Никона Алексей Михайлович написал в таком же духе послание митрополиту Филиппу, где приносил покаяние за своего предшественника Ивана Васильевича, признавал его вину и изъявлял своё почтение к мученику в таких выражениях: «Преклоняю пред тобою сан мой царский за согрешившего против тебя... преклоняю честь моего царства пред твоими честными мощами, повергаю на умоление тебя всю мою власть...»
+                            </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination3"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page4">
+		<div class="slide4" id="slide4">
+		    <div class="swiper-container swiper4">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Официозная версия судебного «дела» патриарха Никона представляет его как человека непомерной гордости, желавшего будто бы подчинить себе царя и государство. Но это обвинение решительно снимается с патриарха при знакомстве с фактами.
+			    </div>
+		            <div class="swiper-slide">Находясь в личной дружбе с царем, Никон побудил и благословил его на войну с Польшей за освобождение православного народа. По просьбе царя, ушедшего на войну, Никон действительно должен был вести некоторые государственные дела. Но как только царь возвращался, патриарх тут же устранялся от всех мирских дел и впоследствии даже упрекал Алексея Михайловича в том, что «работал ему не яко патриарх», «как последний раб», то есть считал занятия государственными делами унижением для своего патриаршего достоинства.
+			    </div>
+			    <div class="swiper-slide">Ещё в 1652 году, когда царь умолял Никона стать патриархом, он в конце концов согласился на том условии, что пробудет у власти не более трёх лет. Вероятно, первосвятитель усмотрел неслучайный, мистический смысл в троичных этапах своей предыдущей жизни: в Анзерском скиту он пробыл 3 года, игуменом Кожеозерской пустыни 3 года, архимандритом Ново-Спасского монастыря 3 года, митрополитом Новогородским 3 года...
+			    </div>
+			    <div class="swiper-slide">И когда Никон пробыл патриархом те же 3 года, он просил об уходе, «бил челом великому государю». То есть даже до своего разрыва с царём Никон тяготился патриаршеством, дважды за время правления просил освободить его от этой власти! Этим ещё раз подрывается миф о непомерном властолюбии Никона. Да, он был властен (пока обязывался править делами), но совсем не властолюбив.
+		 	    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination4"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page5">
+		<div class="slide5" id="slide5">
+		    <div class="swiper-container swiper5">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Государство для человека или человек для государства? Этатисты выбирают последнее. Они радеют о таком общественном устройстве, при котором человек рассматривается не более чем расходная деталь. 25 июня 1945 года Сталин выразил эту идею подняв тост за "винтики" великого государственного механизма. А ещё много лет спустя газеты в Китае прославляли некого Ли Фэна, который назвал себя "нержавеющим винтиком председателя Мао".
+			    </div>
+		            <div class="swiper-slide">Подобное, чисто механическое восприятие общества, тесно перекликается с идеями западной цивилизации. У Кеплера, например, (†1630) имеется такое высказывание: «Моя цель — показать, что мировая машина подобна не Божественному организму, но, скорее, часовому механизму». Впрочем, этот термин «мировая машина» принадлежит не Кеплеру. Он встречается ещё у Коперника (†1543) и даже ещё раньше — у Николая Кузанского (†1464).
+			    </div>
+		            <div class="swiper-slide">Возникает вопрос: кому же была привлекательна идея того, что общество — это машина, в которой люди являются только отдельными винтиками? Ответ очевиден. Такая концепция может нравиться лишь тем, кто управляет машиной. И что же тогда этатизм? Это стремление группы людей получить безграничную власть над обществом, скрывая себя за термином "государство" и требуя абсолютного ему подчинения.
+			    </div>
+		            <div class="swiper-slide">Естественно, такая группа старается освободиться от духовного контроля со стороны Церкви. Это неизбежно. Ведь для того, чтобы осуществлять свои желания, хозяева машины должны продвигать в массы свою систему ценностей. Вы же не можете организовать гей-парад, например, пока в обществе не сформировано толерантное к нему отношение.
+			    </div>
+		            <div class="swiper-slide">А что является главным препятствием на пути продвижения этатистами своей системы ценностей? Традиция и Церковь. Потому что здесь эта система своя. Стало быть, надо ломать традицию и давить Церковь.
+			    </div>
+		            <div class="swiper-slide">Чем и занимаются последние несколько веков.</div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination5"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page6">
+		<div class="slide6" id="slide6">
+		    <div class="swiper-container swiper6">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Испробовав разные способы клеветы, противники Никона прибегли к самому тяжкому обвинению в русской православной среде - патриарх еретичествует, ложно исправляет древние чины и обряды. На это надо сказать, что дело исправления богослужебных книг и обрядов активно шло уже в первой четверти XVII века, при патриархе Филарете. Поэтому можно говорить лишь о завершающей роли Никона в этих преобразованиях. Он довёл их до конца.
+		            </div>
+			    <div class="swiper-slide">Задача ставилась так — привести русское богослужение в полное соответствие с современной греческой практикой. Для Никона цель исправлений заключалась в единении Русской церкви со вселенским православием, а ещё точней — в воссоздании единства Вселенской церкви путем приведения русской литургической жизни в согласие с греческой.
+			    </div>
+		            <div class="swiper-slide">При этом русская иерархия отнюдь не являлась слепым орудием восточных церквей. Принималось только то, что соответствовало общему мнению. В иных случаях разгорались большие споры. Так, например, русское духовенство никак не хотело признавать обливательное крещение законным и отменять вторичное крещение католиков, приходящих к православию. Макарию пришлось подкрепить свои доказательства выписками из древних книг. Когда же стало очевидно, что мнение антиохийского патриарха соответствует исконному верованию православия, Никон сказал: «Я русский, сын русского, но мои убеждения и моя вера греческая».
+			    </div>
+		            <div class="swiper-slide">Многие архиереи согласились: «Свет веры... воссиял нам от стран Востока». Всё это означало, что хотя мы, русские, привыкли в этом деле думать и поступать по-своему, но раз Вселенская церковь издревле учит иначе, мы должны изменить привычные взгляды и делать так, как учит Вселенская церковь.
+			    </div>
+		            <div class="swiper-slide">Весной 1654 года по просьбе Никона был созван поместный собор Русской церкви. Присутствовали 10 митрополитов, 11 архимандритов и игуменов, 13 протоиереев и весь царский синклит (князья и бояре, ведавшие государственными делами). Предложенный Никоном перечень исправлений богослужебных чинов и книг получил от Собора единогласное одобрение. Только коломенский епископ Павел выступил против изменения великопостных поклонов на молитве Ефрема Сирина.
+			    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination6"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page7">
+		<div class="slide7" id="slide7">
+		    <div class="swiper-container swiper7">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">В XVII веке часть русского общества всё более начинает склоняться к принятию тех отрицательных и, в сущности, совсем не христианских влияний, которые проникали с Запада. Именно в высшем сословии (как нигде больше) находили себе страстных поклонников западные ценности, заползавшие в Россию через Немецкую слободу в Москве, гостиные дворы и лавки иностранцев в других крупных городах.
+			    </div>
+		            <div class="swiper-slide">Так что прежде всего от придворной знати, для которой послушание духовному лицу казалось унижением, мог ожидать Никон противодействия своей патриаршей власти. И эта знать была важнейшим звеном системы государственного управления страны.
+			    </div>
+		            <div class="swiper-slide">Никон не проявил робости в общении с элитой. Напротив, хорошо зная, в каком слабом положении перед сильными мира находился его предшественник по кафедре, он прежде всего дал понять, что патриарх, будучи главой великой поместной Церкви, есть лицо, облечённое особой божественной властью, а стало быть требующее к себе самого благоговейного отношения.
+			    </div>
+		            <div class="swiper-slide">Первыми это ощутили представители высшего сословия - царские князья и бояре. Павел Алеппский пишет: «Оные прежде входили к патриарху без доклада привра- тников. Тот же выходил к ним навстречу и при уходе шёл провожать. Отныне, министры царя и его приближённые долгое время сидят у наружных дверей, пока Никон не дозволит им войти, а входят с чрезвычайной робостью и страхом, причём до самого окончания своего дела стоят на ногах, а когда уходят, Никон продолжает сидеть».
+			    </div>
+		            <div class="swiper-slide">Князь Михаил Пронский, три князя Хилковы, князь Василий Ромодановский, которым было поручено управление Москвой, в ответ на распоряжения Никона обращались к нему весьма примечательно: «Великому государю, святейшему Никону, патриарху Московскому и Всея Великия и Малыя России Мишка Пронский с товарищи челом бьют...»
+			    </div>
+		            <div class="swiper-slide">Что же касается борьбы против западных влияний, Никон стоял как мог. В частности, это проявилось в его кампании 1654 года, когда он приказал изымать из домов богатых и знатных людей иконы, написанные в западноевропейском стиле, неправославно. Лики на этих иконах выскабливались, а затем иконы возвращались владельцам для написания православных изображений.
+			    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination7"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page8">
+		<div class="slide8" id="slide8">
+		    <div class="swiper-container swiper8">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">В 1658 году, когда Никон ушёл от патриаршества, раскола в Церкви ещё не было. Несколько злобных священно- служителей хулили его вплоть до безобразных ругательств, сочиняли о нём фантастические небылицы и тем, конечно, волновали людей. Но раскол как широкое движение народных масс, начался гораздо позже Никона и по-настоящему вспыхнул только после его смерти.
+			    </div>
+		            <div class="swiper-slide">Сам Никон принял все необходимые меры, чтобы этого не случилось. В частности разрешил желающим служить по старым книгам и обрядам, допуская тем самым разность мнений в вопросах, не затрагивающих существа веры. Отсюда хорошо видно, что исправление обрядности не было для первосвятителя таким делом, которому он решился бы принести в жертву церковное единство.
+			    </div>
+		            <div class="swiper-slide">Большой Московский собор 1666-1667 годов осудил Никона на лишение сана и ссылку в Белозерские монастыри. Первосвятитель был прав, когда говорил, что прибывшие восточные патриархи творили суд, заботясь лишь о том, чтобы угодить царю. Ими руководили корыстные материальные расчеты, о которых они с предельной откровенностью и поведали своим письмом в Константинополь.
+			    </div>
+		            <div class="swiper-slide">Тот же Собор осудил и проклял всех, кто придерживался старых обрядов, то есть поддержав и одобрив все исправления, сделанные при Никоне, Собор не поддержал важнейшей духовной линии святейшего — допускать служение как по новым, так и по старым книгам.
+			    </div>
+		            <div class="swiper-slide">Все основные деятели этого суда кончили жизнь самым несчастным образом. Александрийский патриарх Паисий сделался изгнанником, антиохийский Макарий скончался в турецкой тюрьме, обвинённый в каких-то финансовых преступлениях, а Паисий Лигарид был удалён из Москвы, но не выпущен из России, где умер в одном из монастырей, так никогда не увидев ни родины, ни своей митрополии, о которой он, впрочем, меньше всего заботился.
+			    </div>
+		            <div class="swiper-slide">Самое же печальное то, что лишив себя единения и совета с патриархом Никоном, царь Алексей допустил фатальную ошибку — он не осознал всей пагубности постановлений проклинавших старые обряды и не предотвратил их принятия, что вполне бы мог сделать.
+			    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination8"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page9">
+		<div class="slide9" id="slide9">
+		    <div class="swiper-container swiper9">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">1682 год — вот та историческая черта, после которой можно говорить о расколе как о широком движении народных масс. До этого момента староверы ещё не теряли надежды убедить государя восстановить истинное православие, т.е. вернуться к старым обрядам. Но последняя их попытка датируется именно 1682 годом, когда на гребне стрелецких волнений, по безвременной кончине талантливого царя Фёдора Алексеевича, встал вопрос о наследнике.
+			    </div>
+		            <div class="swiper-slide">В Грановитой палате Кремля, в присутствии царевны Софьи, правительства и архиерейского Собора состоялись тогда публичные «прения о вере», где во главе старообрядцев выступил Никита Пустосвят. Полемизировать с Афанасием Холмогорским ему оказалось не под силу и в отчаянной ярости он ударил последнего по лицу. Произошло смятение. Все восприняли это как оскорбление и Церкви, и царской семьи. Старообрядцев выгнали. Пря была проиграна по всем статьям.
+			    </div>
+		            <div class="swiper-slide">С этого момента старообрядческий мир уходит во внутреннюю изоляцию. Не удалось изолировать Русь, они изолировали себя. Государственные дела их больше не интересуют и они стараются спрятаться как можно дальше, образуя старообрядческие скиты, укрываясь в лесах, болотах, или уходя за Камень, то есть за Урал.
+			    </div>
+		            <div class="swiper-slide">Резко увеличивается и число изуверских самосожжений. К 1690 году с собой покончило около 20 тысяч старообрядцев. Они наконец увидели то, что патриарх Никон видел уже давно, а именно — отступление власти от евангельских заповедей вообще. И расценили это точно так же, как расцени- вал патриарх, — как покалиптическое явление и дьявольское узаконение. Петра I старообрядцы прямо объявили антихристом.
+			    </div>
+
+		        </div>
+		        <div class="swiper-pagination swiper-pagination9"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page10">
+		<div class="slide10" id="slide10">
+		    <div class="swiper-container swiper10">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Интереснейшая деталь: самый известный самосжигатель, который по не проверенным сведениям уговорил самосжечься три-четыре тысячи человек за несколько партий в разных местах, но не лицемер, потому что под конец самосжёгся с последней партией, был некий Вавила, по всей вероятности француз и даже, как предполагают, выпускник Сорбонны.
+			    </div>
+		            <div class="swiper-slide">Впрочем, на Руси раньше ухитрялись обрусеть за два поколения, очень быстро. У нас тогда была настоящая национальная традиция, и в неё вливались.
+			    </div>
+		            <div class="swiper-slide">Достаточно вспомнить два особо известных имени: боярыню Морозову и её родную сестру княгиню Урусову, урожденных девиц Соковниных. А Соковнины — род немецкого происхождения, выехавший на русскую службу уже в XVII веке. Если не во втором, то в третьем поколении вот вам, пожалуйста, стойкие старообрядцы. А вообще-то они немки.
+			    </div>
+
+		        </div>
+		        <div class="swiper-pagination swiper-pagination10"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+		<div class="page page11">
+		<div class="slide11" id="slide11">
+		    <div class="swiper-container swiper11">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Совершенно очевидно, что церковные исправ- ления патриарха Никона нельзя назвать «реформой», а его самого — «реформатором» в том смысле, какой обычно вкладывается в эти понятия новейшим временем.
+			    </div>
+		            <div class="swiper-slide">С точки зрения таких понятий Никон скорее один из величайших консерваторов. Все его преобразования были сознательно направлены как раз на уничтожение «новшеств», каковыми, по его глубокому убеждению, являлись обряды, подвер- гавшиеся искоренению или исправлению.
+			    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination11"></div>
+		    </div>
+		</div>
+		</div>
+		<div class="page page12">
+		<div class="slide12" id="slide12">
+		    <div class="swiper-container swiper12">
+		        <div class="swiper-wrapper">
+		            <div class="swiper-slide">Патриарх Никон скончался в 1681 году. Любовь к нему народа и многих людей в высших кругах общества была столь велика, что никто не принимал всерьёз соборного определения о снятии с него сана; его продолжали считать патриархом! И хоронили как патриарха. При огромном стечении народа служба погребения длилась десять часов подряд. Царь лично читал шесто- псалмие и при этом плакал. Плакали многие.
+			    </div>
+		            <div class="swiper-slide">На похоронах присутствовала вся царская семья, в том числе и 9-летний Пётр Алексеевич, уже достаточно взрослый, чтобы запомнить это многозначительное событие. Такого высокого положения и авторитета в обществе, какого достигла Русская Православная Церковь при патриархе Никоне, она не имела более никогда.
+			    </div>
+		            <div class="swiper-slide">В конце концов, царская власть просто перестала считаться с церковной. Если патриарх Никон, опираясь в основном на Иоанна Златоуста, твёрдо отстаивал приоритет Церкви: в делах церковных «священство преболе царства есть», то греческая иерархия и старообрядцы единодушно отдавали превосходство «благочестивому царю». Тем самым явилось расхождение бывших некогда в единстве представлений о России как о «третьем Риме» и «Новом Иерусалиме».
+			    </div>
+		            <div class="swiper-slide">Последовательное осуществление одной только доктрины «третьего Рима» предполагало погоню за внешним могуществом прежде всего, служение этому могуществу более, чем Богу, более, чем какому-либо духовному началу! Отсюда — узурпация государством церковной власти и полное подавление Церкви. К чему всё это привело русскую монархию, хорошо известно из истории. «Рим» и «Иерусалим», мирское и духовное разошлись на огромное расстояние!
+			    </div>
+		        </div>
+		        <div class="swiper-pagination swiper-pagination12"></div>
+		    </div>
+  		    <div class="show" onclick="javascript:ShowFull();"></div>
+		</div>
+		</div>
+	</div>
+
+	<div class="back" onclick="javascript:HideFull();"></div>
+	    <div class="fullnav"><div class="fnc">
+		<div class="fullnav-li active" id="fullnav-li1">1</div>
+		<div class="fullnav-li" id="fullnav-li2">2</div>
+		<div class="fullnav-li" id="fullnav-li3">3</div>
+		<div class="fullnav-li" id="fullnav-li4">4</div>
+		<div class="fullnav-li" id="fullnav-li5">5</div>
+		<div class="fullnav-li" id="fullnav-li6">6</div>
+		<div class="fullnav-li" id="fullnav-li7">7</div>
+		<div class="fullnav-li" id="fullnav-li8">8</div>
+		<div class="fullnav-li" id="fullnav-li9">9</div>
+		<div class="fullnav-li" id="fullnav-li10">10</div>
+		<div class="fullnav-li" id="fullnav-li11">11</div>
+		<div class="fullnav-li" id="fullnav-li12">12</div>
+	    </div></div>
+
+	<div id="inside">
+		<div class="fullpage fullpage1">			
+			<div class="fullimg"><img src="img/1.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">aaa</div>
+		</div>
+		<div class="fullpage fullpage2">		
+			<div class="fullimg"><img src="img/2.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage3">			
+			<div class="fullimg"><img src="img/3.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage4">			
+			<div class="fullimg"><img src="img/4.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage5">			
+			<div class="fullimg"><img src="img/5.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage6">			
+			<div class="fullimg"><img src="img/6.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage7">			
+			<div class="fullimg"><img src="img/7.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage8">			
+			<div class="fullimg"><img src="img/8.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage9">			
+			<div class="fullimg"><img src="img/9.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage10">			
+			<div class="fullimg"><img src="img/10.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage11">			
+			<div class="fullimg"><img src="img/11.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+		<div class="fullpage fullpage12">			
+			<div class="fullimg"><img src="img/12.jpg" /></div>
+			<div class="fullsound"></div>
+			<div class="fulltext">bbb</div>
+		</div>
+
+	</div>
+
+
+    <!-- Swiper JS -->
+
+    <script src="js/swiper.jquery.js"></script>
+
+    <!-- Initialize Swiper -->
+    <script>
+    var swiper1 = new Swiper('.swiper1', {
+        pagination: '.swiper-pagination1',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(1,swiper1.activeIndex,swiper1.slides.length,swiper1.swipeDirection);}
+    });
+    var swiper2 = new Swiper('.swiper2', {
+        pagination: '.swiper-pagination2',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(2,swiper2.activeIndex,swiper2.slides.length,swiper2.swipeDirection);}
+    });
+    var swiper3 = new Swiper('.swiper3', {
+        pagination: '.swiper-pagination3',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(3,swiper3.activeIndex,swiper3.slides.length,swiper3.swipeDirection);}
+    });
+    var swiper4 = new Swiper('.swiper4', {
+        pagination: '.swiper-pagination4',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(4,swiper4.activeIndex,swiper4.slides.length,swiper4.swipeDirection);}
+    });
+
+    var swiper5 = new Swiper('.swiper5', {
+        pagination: '.swiper-pagination5',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(5,swiper5.activeIndex,swiper5.slides.length,swiper5.swipeDirection);}
+    });
+
+    var swiper6 = new Swiper('.swiper6', {
+        pagination: '.swiper-pagination6',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(6,swiper6.activeIndex,swiper6.slides.length,swiper6.swipeDirection);}
+    });
+
+    var swiper7 = new Swiper('.swiper7', {
+        pagination: '.swiper-pagination7',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(7,swiper7.activeIndex,swiper7.slides.length,swiper7.swipeDirection);}
+    });
+    var swiper8 = new Swiper('.swiper8', {
+        pagination: '.swiper-pagination8',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(8,swiper8.activeIndex,swiper8.slides.length,swiper8.swipeDirection);}
+    });
+
+    var swiper9 = new Swiper('.swiper9', {
+        pagination: '.swiper-pagination9',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(9,swiper9.activeIndex,swiper9.slides.length,swiper9.swipeDirection);}
+    });
+
+    var swiper10 = new Swiper('.swiper10', {
+        pagination: '.swiper-pagination10',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(10,swiper10.activeIndex,swiper10.slides.length,swiper10.swipeDirection);}
+    });
+
+    var swiper11 = new Swiper('.swiper11', {
+        pagination: '.swiper-pagination11',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(11,swiper11.activeIndex,swiper11.slides.length,swiper11.swipeDirection);}
+    });
+
+    var swiper12 = new Swiper('.swiper12', {
+        pagination: '.swiper-pagination12',
+        paginationClickable: true,
+	onTransitionStart : function() {initGroup(12,swiper12.activeIndex,swiper12.slides.length,swiper12.swipeDirection);}
+    });
+
+    </script>
+
+</body>
+</html>
